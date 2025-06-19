@@ -3,11 +3,14 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config(); // Load env variables
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const PORT =process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 // Google OAuth2 Client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -16,23 +19,24 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Atlas connection
+// MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-
-// Sample schema
+// User Schema
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true }, // In real apps, store hashed passwords
+  password: { type: String, required: true }, // For demo only; hash in production
 });
 
 const User = mongoose.model('User', UserSchema);
 
-// Signup Route
+// Routes
+
+// Signup
 app.post('/api/signup', async (req, res) => {
   try {
     const user = new User(req.body);
@@ -43,31 +47,23 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// Login Route
+// Login
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    if (user.password !== password) {
-      return res.status(401).json({ message: 'Invalid password' });
-    }
-
     res.status(200).json({ message: 'Login successful', user });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error });
+    res.status(500).json({ message: 'Login error', error });
   }
 });
 
-// Google Login Route
+// Google Login
 app.post('/api/google-login', async (req, res) => {
   const { token } = req.body;
-
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
@@ -80,11 +76,7 @@ app.post('/api/google-login', async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      user = new User({
-        name,
-        email,
-        password: googleId, // Not secure: for testing/demo only
-      });
+      user = new User({ name, email, password: googleId });
       await user.save();
     }
 
@@ -95,7 +87,20 @@ app.post('/api/google-login', async (req, res) => {
   }
 });
 
-// Start the server
+// === Serve React Frontend ===
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static files from client folder (React build)
+app.use(express.static(path.join(__dirname, 'client')));
+
+// Catch-all route to handle client-side routing
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'index.html'));
+});
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
