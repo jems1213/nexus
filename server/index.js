@@ -1,15 +1,16 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';
 
+dotenv.config(); // Load env variables
+
 const app = express();
-const PORT = 5000;
+const PORT =process.env.PORT || 5000;
 
 // Google OAuth2 Client
-const client = new OAuth2Client(
-  '439515091141-jji6nsie0cs27eq2vneoqvfclngjstie.apps.googleusercontent.com'
-);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Middleware
 app.use(cors());
@@ -17,7 +18,7 @@ app.use(express.json());
 
 // MongoDB Atlas connection
 mongoose
-  .connect('mongodb+srv://jvnews0:Jems%408010@cluster0.vo1hrnp.mongodb.net/new', {
+  .connect(process.env.MONGODB_URI,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -76,7 +77,7 @@ app.post('/api/google-login', async (req, res) => {
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: '439515091141-jji6nsie0cs27eq2vneoqvfclngjstie.apps.googleusercontent.com',
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
