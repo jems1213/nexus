@@ -15,6 +15,8 @@ import PrivacyPage from './components/PrivacyPage.jsx';
 import TermsAndConditions from './components/TermsAndConditions.jsx';
 import ContactPage from './components/ContactPage.jsx';
 function App() {
+  
+
   return (
      
     <Router>
