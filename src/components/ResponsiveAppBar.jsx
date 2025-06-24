@@ -21,7 +21,7 @@ import {
   faSignOutAlt,
   faUser,
   faTachometerAlt,
-  faInfoCircle 
+  faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 // Custom colors
@@ -184,7 +184,7 @@ function ResponsiveAppBar() {
         <Container maxWidth="xl">
           <Toolbar disableGutters>
 
-            {/* Logo */}
+            {/* Logo (Desktop) */}
             <Link to="/" style={{ textDecoration: 'none' }} onClick={scrollToTop}>
               <AnimatedLogo sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: colors.textLight }} />
             </Link>
@@ -205,64 +205,67 @@ function ResponsiveAppBar() {
                 '&:hover': { color: colors.secondary }
               }}
             >
-              NEXUS 
+              NEXUS
             </Typography>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu (Hamburger Icon and Menu Items) */}
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
               <IconButton size="large" onClick={handleOpenNavMenu} color="inherit">
                 <MenuIcon />
               </IconButton>
-              <Menu 
-                anchorEl={anchorElNav} 
-                open={Boolean(anchorElNav)} 
+              <Menu
+                anchorEl={anchorElNav}
+                open={Boolean(anchorElNav)}
                 onClose={handleCloseNavMenu}
                 sx={{
                   display: { xs: 'block', md: 'none' },
-                  '& .MuiPaper-root': { 
-                    backgroundColor: colors.primary, 
+                  '& .MuiPaper-root': {
+                    backgroundColor: colors.primary,
                     color: colors.textLight,
-                    minWidth: '200px'
+                    minWidth: '150px',
                   }
                 }}
               >
                 {pages.map((page) => (
-                  <MenuItem 
-                    key={page} 
-                    onClick={() => { 
-                      handleNavigate(`/${page.toLowerCase()}`); 
-                      handleCloseNavMenu(); 
+                  <MenuItem
+                    key={page}
+                    onClick={() => {
+                      handleNavigate(`/${page.toLowerCase()}`);
+                      handleCloseNavMenu();
                     }}
                     sx={{ py: 1.5 }}
                   >
-                    <FontAwesomeIcon icon={getIcon(page)} style={{ marginRight: 12 }} />
-                    <Typography textAlign="center">{page}</Typography>
+                    <FontAwesomeIcon icon={getIcon(page)} style={{ marginRight: 8 }} />
+                    <Typography textAlign="left" noWrap sx={{ fontSize: '0.95rem' }}>{page}</Typography>
                   </MenuItem>
                 ))}
-                {!isLoggedIn && [
-                  <MenuItem 
-                    key="login"
-                    onClick={() => { 
-                      handleLogin(); 
-                      handleCloseNavMenu(); 
-                    }}
-                    sx={{ py: 1.5 }}
-                  >
-                    <FontAwesomeIcon icon={faSignInAlt} style={{ marginRight: 12 }} />
-                    <Typography>Login</Typography>
-                  </MenuItem>,
-                  <MenuItem 
-                    key="signup"
-                    onClick={() => { 
-                      handleSignup(); 
-                      handleCloseNavMenu(); 
-                    }}
-                    sx={{ py: 1.5 }}
-                  >
-                    <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: 12 }} />
-                    <Typography>Sign Up</Typography>
-                  </MenuItem>
-                ]}
+                {/* Login and Sign Up MenuItems in hamburger, visible only if NOT logged in */}
+                {!isLoggedIn && (
+                  <>
+                    <MenuItem
+                      key="mobile-login"
+                      onClick={() => {
+                        handleLogin();
+                        handleCloseNavMenu();
+                      }}
+                      sx={{ py: 1.5 }}
+                    >
+                      <FontAwesomeIcon icon={faSignInAlt} style={{ marginRight: 8 }} />
+                      <Typography textAlign="left" noWrap sx={{ fontSize: '0.95rem' }}>Login</Typography>
+                    </MenuItem>
+                    <MenuItem
+                      key="mobile-signup"
+                      onClick={() => {
+                        handleSignup();
+                        handleCloseNavMenu();
+                      }}
+                      sx={{ py: 1.5 }}
+                    >
+                      <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: 8 }} />
+                      <Typography textAlign="left" noWrap sx={{ fontSize: '0.95rem' }}>Sign Up</Typography>
+                    </MenuItem>
+                  </>
+                )}
               </Menu>
             </Box>
 
@@ -289,9 +292,9 @@ function ResponsiveAppBar() {
             </Typography>
 
             {/* Desktop Navigation */}
-            <Box sx={{ 
-              flexGrow: 1, 
-              display: { xs: 'none', md: 'flex' }, 
+            <Box sx={{
+              flexGrow: 1,
+              display: { xs: 'none', md: 'flex' },
               ml: 3,
               gap: 3
             }}>
@@ -314,10 +317,11 @@ function ResponsiveAppBar() {
               ))}
             </Box>
 
-            {/* Auth Buttons */}
+            {/* Auth Buttons / User Avatar (Conditional visibility) */}
             <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
               {!isLoggedIn ? (
-                <>
+                // These buttons are only displayed on 'md' (desktop) and larger screens
+                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                   <AuthButton
                     variant="outlined"
                     onClick={handleLogin}
@@ -344,8 +348,9 @@ function ResponsiveAppBar() {
                     <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: 6 }} />
                     Sign Up
                   </AuthButton>
-                </>
+                </Box>
               ) : (
+                // The avatar and its menu should be visible on both phone and desktop when logged in
                 <Tooltip title={user?.email || 'Open settings'}>
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
@@ -407,7 +412,7 @@ function ResponsiveAppBar() {
           </Toolbar>
         </Container>
       </AppBar>
-      <Toolbar />
+      <Toolbar /> {/* This adds padding equal to the AppBar's height */}
 
       {/* Logout Confirmation Dialog */}
       <Dialog
@@ -466,4 +471,4 @@ function ResponsiveAppBar() {
   );
 }
 
-export default ResponsiveAppBar;  
+export default ResponsiveAppBar;
